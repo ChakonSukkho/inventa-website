@@ -114,13 +114,13 @@ if (!empty($file)) {
     <?php if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
         <img src="<?= htmlspecialchars($filePath) ?>" class="cert-thumb" alt="Certificate">
 
-        <?php elseif ($fileExt === 'pdf'): ?>
-            <div class="cert-thumb pdf-fake d-flex align-items-center justify-content-center">
-                <div class="pdf-box text-center">
-                    <div class="pdf-icon">PDF</div>
-                    <small class="text-muted">Certificate</small>
-                </div>
+    <?php elseif ($fileExt === 'pdf'): ?>
+        <div class="cert-thumb pdf-fake d-flex align-items-center justify-content-center">
+            <div class="pdf-box text-center">
+                <div class="pdf-icon">PDF</div>
+                <small class="text-muted">Certificate</small>
             </div>
+        </div>
 
     <?php else: ?>
         <div class="cert-thumb bg-light d-flex align-items-center justify-content-center small">
