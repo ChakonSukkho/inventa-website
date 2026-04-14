@@ -181,48 +181,13 @@ $result2 = mysqli_stmt_get_result($stmt2);
                             }
                             ?>
 
-<?php
-$fileExt = '';
-if (!empty($displayImg)) {
-    $fileExt = strtolower(pathinfo($displayImg, PATHINFO_EXTENSION));
-}
-?>
-
-<div class="cert-preview-area">
-    <?php if (!empty($displayImg)): ?>
-
-        <?php if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
-            
-            <!-- IMAGE PREVIEW -->
-            <img src="uploads/<?= e($displayImg); ?>" alt="Certificate">
-
-        <?php elseif ($fileExt === 'pdf'): ?>
-
-            <!-- PDF PREVIEW -->
-            <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                
-                <embed 
-                    src="uploads/<?= e($displayImg); ?>#toolbar=0&navpanes=0&scrollbar=0" 
-                    type="application/pdf" 
-                    width="100%" 
-                    height="120px"
-                >
-
-                <small class="text-muted mt-1">PDF Preview</small>
-
-            </div>
-
-        <?php else: ?>
-
-            <!-- UNKNOWN FILE -->
-            <span class="text-muted">File available</span>
-
-        <?php endif; ?>
-
-    <?php else: ?>
-        <span class="text-muted small italic">No Image Uploaded</span>
-    <?php endif; ?>
-</div>
+                            <div class="cert-preview-area">
+                                <?php if (!empty($displayImg)): ?>
+                                    <img src="uploads/<?= e($displayImg); ?>" alt="Certificate">
+                                <?php else: ?>
+                                    <span class="text-muted small italic">No Image Uploaded</span>
+                                <?php endif; ?>
+                            </div>
 
                             <div class="p-3">
                                 <div class="d-flex justify-content-between align-items-start mb-2">

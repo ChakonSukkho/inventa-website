@@ -1,7 +1,7 @@
 <?php
 require_once "includes/init.php";
 require_login();
-require_role(['admin', 'staff']); // Hanya Admin & Staff boleh tengok senarai ni
+require_role(['admin', 'staff']);
 
 /* =========================
    PAGINATION & SEARCH LOGIC
@@ -18,13 +18,30 @@ if (!empty($search)) {
 }
 
 /* =========================
-   SYARAT PENAPISAN ROLE
-   Kita tambah u.role = 'student' supaya 
-   akaun Admin/Staff tak muncul dalam list.
+   ROLE FILTER (FIXED)
 ========================= */
 $role_filter = " AND u.role = 'student' ";
 
-// Dapatkan jumlah baris untuk pagination (dengan tapisan role)
+// 🔥 STAFF ONLY SEE THEIR OWN DEPARTMENT (FINAL FIX)
+if ($_SESSION['role'] === 'staff') {
+
+    $staff_id = $_SESSION['user_id'];
+
+    // Get department directly from DB
+    $stmt = mysqli_prepare($conn, "SELECT department FROM users WHERE user_id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $staff_id);
+    mysqli_stmt_execute($stmt);
+    $staff = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+    if (!empty($staff['department'])) {
+        $dept = mysqli_real_escape_string($conn, $staff['department']);
+        $role_filter .= " AND s.program = '$dept' ";
+    }
+}
+
+/* =========================
+   PAGINATION COUNT
+========================= */
 $total_rows_query = "SELECT COUNT(*) as t 
                      FROM students s 
                      JOIN users u ON s.user_id = u.user_id 
@@ -34,13 +51,16 @@ $total_rows_result = mysqli_query($conn, $total_rows_query);
 $total_rows = mysqli_fetch_assoc($total_rows_result)['t'];
 $total_pages = ceil($total_rows / $limit);
 
-// Ambil data (Hanya role 'student' sahaja)
+/* =========================
+   FETCH DATA
+========================= */
 $sql = "SELECT s.*, u.username 
         FROM students s 
         JOIN users u ON s.user_id = u.user_id 
         WHERE 1=1 $role_filter $search_query 
         ORDER BY s.student_name ASC 
         LIMIT $limit OFFSET $offset";
+
 $result = mysqli_query($conn, $sql);
 
 include "includes/header.php";

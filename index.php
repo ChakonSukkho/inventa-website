@@ -2,7 +2,7 @@
 require_once "includes/init.php";
 
 if (!is_logged_in()) {
-    header("Location: /login.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -10,14 +10,15 @@ switch ($_SESSION['role']) {
     case 'admin':
     case 'staff':
         header("Location: dashboard.php");
-        exit;
+        break;
 
     case 'student':
         header("Location: student_profile.php");
-        exit;
+        break;
 
     default:
         session_destroy();
-        header("Location: /login.php");
-        exit;
+        header("Location: login.php");
 }
+
+exit;
