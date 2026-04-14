@@ -91,50 +91,49 @@ include "includes/header.php";
                 <div class="col-md-6 mb-3">
                     <div class="card-gov p-3 h-100 d-flex flex-row align-items-center">
                         <div style="width: 100px; flex-shrink: 0;" class="me-3">
-                            <?php
-                            $file = $t['certificate'] ?? '';
-                            $fileExt = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                            ?>
-                            
-                            <?php if (!empty($file)): ?>
-                            
-                                <?php if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
-                                    
-                                    <!-- IMAGE -->
-                                    <img src="uploads/<?= $file ?>" class="cert-thumb">
-                            
-                                <?php elseif ($fileExt === 'pdf'): ?>
-                            
-                                    <!-- PDF -->
-                                    <div class="cert-thumb d-flex align-items-center justify-content-center flex-column" style="background:#fff;">
-                                        
-                                        <embed 
-                                            src="uploads/<?= $file ?>#toolbar=0" 
-                                            type="application/pdf" 
-                                            width="100%" 
-                                            height="90px"
-                                            style="border:none;"
-                                        >
-                            
-                                        <small class="text-muted mt-1">PDF</small>
-                                    </div>
-                            
-                                <?php else: ?>
-                            
-                                    <!-- OTHER FILE -->
-                                    <div class="cert-thumb bg-light d-flex align-items-center justify-content-center small">
-                                        File
-                                    </div>
-                            
-                                <?php endif; ?>
-                            
-                            <?php else: ?>
-                            
-                                <div class="cert-thumb bg-light d-flex align-items-center justify-content-center small">
-                                    No File
-                                </div>
-                            
-                            <?php endif; ?>
+<?php
+$file = trim($t['certificate'] ?? '');
+$filePath = '';
+$fileExt = '';
+
+if (!empty($file)) {
+    if (strpos($file, '/uploads/') === 0) {
+        $filePath = ltrim($file, '/');
+    } elseif (strpos($file, 'uploads/') === 0) {
+        $filePath = $file;
+    } else {
+        $filePath = 'uploads/' . ltrim($file, '/');
+    }
+
+    $fileExt = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+}
+?>
+
+<?php if (!empty($filePath)): ?>
+
+    <?php if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+        <img src="<?= htmlspecialchars($filePath) ?>" class="cert-thumb" alt="Certificate">
+
+    <?php elseif ($fileExt === 'pdf'): ?>
+        <div class="cert-thumb pdf-thumb d-flex align-items-center justify-content-center flex-column">
+            <div class="pdf-icon">PDF</div>
+            <small class="text-muted mt-1">PDF File</small>
+            <a href="<?= htmlspecialchars($filePath) ?>" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                View PDF
+            </a>
+        </div>
+
+    <?php else: ?>
+        <div class="cert-thumb bg-light d-flex align-items-center justify-content-center small">
+            File
+        </div>
+    <?php endif; ?>
+
+<?php else: ?>
+    <div class="cert-thumb bg-light d-flex align-items-center justify-content-center small">
+        No File
+    </div>
+<?php endif; ?>
                         </div>
                         <div>
                             <span class="badge bg-primary mb-1"><?= $t['category_name'] ?></span>
