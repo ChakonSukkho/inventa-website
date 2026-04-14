@@ -277,30 +277,41 @@ $student = mysqli_fetch_assoc($result);
                                 <div class="talent-card">
 
                                     <?php
-                                    $images = [
-                                        $t['certificate'],
-                                        $t['certificate2'],
-                                        $t['certificate3']
-                                    ];
+$images = [
+    $t['certificate'],
+    $t['certificate2'],
+    $t['certificate3']
+];
 
-                                    $mainImage = '';
-                                    foreach ($images as $img) {
-                                        if (!empty($img)) {
-                                            $mainImage = $img;
-                                            break;
-                                        }
-                                    }
-                                    ?>
+$mainImage = '';
+foreach ($images as $img) {
+    if (!empty($img)) {
+        $mainImage = trim($img);
+        break;
+    }
+}
 
-                                    <?php if (!empty($mainImage)): ?>
-                                        <div class="cert-main-wrapper">
-                                            <img src="uploads/<?= e($mainImage); ?>" class="cert-main-img">
-                                        </div>
-                                    <?php else: ?>
-                                        <div class="cert-main-wrapper text-muted">
-                                            <span>No Certificate Provided</span>
-                                        </div>
-                                    <?php endif; ?>
+$fileExt = '';
+if (!empty($mainImage)) {
+    $fileExt = strtolower(pathinfo($mainImage, PATHINFO_EXTENSION));
+}
+?>
+
+<?php if (!empty($mainImage)): ?>
+    <div class="cert-main-wrapper">
+        <?php if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+            <img src="uploads/<?= e($mainImage); ?>" class="cert-main-img" alt="Certificate Image">
+        <?php elseif ($fileExt === 'pdf'): ?>
+            <embed src="uploads/<?= e($mainImage); ?>" type="application/pdf" width="100%" height="140px">
+        <?php else: ?>
+            <span class="text-muted">File available</span>
+        <?php endif; ?>
+    </div>
+<?php else: ?>
+    <div class="cert-main-wrapper text-muted">
+        <span>No Certificate Provided</span>
+    </div>
+<?php endif; ?>
 
                                     <div class="p-4">
                                         <div class="d-flex justify-content-between align-items-center mb-3">

@@ -6,140 +6,221 @@ require_role(['admin','staff']);
 include "includes/header.php";
 
 /* =========================
+   DASHBOARD FILTERS (COMBINED LOGIC)
+========================= */
+$filter_program = $_GET['program'] ?? '';
+$filter_cat     = $_GET['cat_filter'] ?? '';   // Filter for Category
+$filter_level   = $_GET['level_filter'] ?? ''; // Filter for Level
+
+// Bina Global SQL supaya semua penapis digunakan pada semua graf
+$global_sql = "";
+if (!empty($filter_program)) {
+    $global_sql .= " AND s.program = '" . mysqli_real_escape_string($conn, $filter_program) . "' ";
+}
+if (!empty($filter_cat)) {
+    $global_sql .= " AND t.category_id = '" . mysqli_real_escape_string($conn, $filter_cat) . "' ";
+}
+if (!empty($filter_level)) {
+    $global_sql .= " AND t.level = '" . mysqli_real_escape_string($conn, $filter_level) . "' ";
+}
+
+/* =========================
    STATISTICS QUERIES
 ========================= */
-// Total Students
-$totalStudent = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS t FROM students"))['t'];
+// 1. Total Students (Filtered)
+$totalStudent = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(DISTINCT s.student_id) AS t FROM students s JOIN talents t ON s.student_id = t.student_id WHERE 1=1 $global_sql"))['t'];
 
-// Top Category
-$resultTop = mysqli_query($conn, "
+// 2. Data for Category Chart
+$catDataQuery = "
     SELECT c.category_name, COUNT(t.talent_id) AS total
     FROM talents t
     JOIN categories c ON t.category_id = c.category_id
+    JOIN students s ON t.student_id = s.student_id
+    WHERE 1=1 $global_sql
     GROUP BY c.category_name
-    ORDER BY total DESC LIMIT 1
-");
-$topCategory = mysqli_fetch_assoc($resultTop);
+";
+$catResult = mysqli_query($conn, $catDataQuery);
+$catLabels = []; $catData = [];
+while ($row = mysqli_fetch_assoc($catResult)) {
+    $catLabels[] = $row['category_name'];
+    $catData[] = (int)$row['total'];
+}
 
-// Category Stats for Chart
-$result = mysqli_query($conn, "
-    SELECT c.category_name, COUNT(t.talent_id) AS total
+// 3. Data for Level Chart
+$levelDataQuery = "
+    SELECT t.level, COUNT(t.talent_id) AS total
     FROM talents t
-    JOIN categories c ON t.category_id = c.category_id
-    GROUP BY c.category_name
-");
-
-$labels = []; 
-$data = [];
-while ($row = mysqli_fetch_assoc($result)) {
-    $labels[] = $row['category_name'];
-    $data[] = (int)$row['total'];
+    JOIN students s ON t.student_id = s.student_id
+    WHERE 1=1 $global_sql
+    GROUP BY t.level
+";
+$levelResult = mysqli_query($conn, $levelDataQuery);
+$levelLabels = []; $levelData = [];
+while ($row = mysqli_fetch_assoc($levelResult)) {
+    $levelLabels[] = strtoupper($row['level']);
+    $levelData[] = (int)$row['total'];
 }
 
-/* AI INSIGHT LOGIC */
-$ai_text = "Insufficient data for analysis.";
-if (count($data) > 0) {
-    $maxIndex = array_keys($data, max($data))[0];
-    $topCat = $labels[$maxIndex];
-    $ai_text = "<strong>$topCat</strong> is currently the most active talent category. Consider creating more engagement for other categories to ensure balanced student growth.";
-}
+$category_list = mysqli_query($conn, "SELECT * FROM categories");
 ?>
 
 <style>
+    :root { --gov-navy: #002b5e; --gov-gold: #eeb012; }
     body { background-color: #f5f7fa !important; }
-    .page-title { color: #002b5e; font-weight: bold; border-left: 5px solid #eeb012; padding-left: 15px; text-transform: uppercase; letter-spacing: 1px; }
-    .stat-card { background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .stat-title { color: #718096; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
-    .stat-value { color: #002b5e; font-size: 2rem; font-weight: 800; }
-    .card-gov { background: #fff; border-radius: 8px; border: 1px solid #dce1e6; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .page-title { color: var(--gov-navy); font-weight: bold; border-left: 5px solid var(--gov-gold); padding-left: 15px; text-transform: uppercase; }
+    .card-gov { background: #fff; border-radius: 8px; border: 1px solid #dce1e6; box-shadow: 0 4px 12px rgba(0,0,0,0.06); height: 100%; }
+    .stat-card { background: #fff; border-radius: 8px; border: 1px solid #dce1e6; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .btn-gov { background-color: var(--gov-navy); color: #ffffff; font-weight: bold; font-size: 0.8rem; }
+    .filter-box { background: #f8f9fa; border-bottom: 1px solid #eee; padding: 12px; margin: -1.5rem -1.5rem 1.5rem -1.5rem; }
 </style>
 
 <div class="container mt-4 mb-5">
-    <h3 class="page-title mb-4">System Dashboard</h3>
+    <h3 class="page-title mb-4">Advanced Analytics Dashboard</h3>
 
-    <div class="row mb-4">
-        <div class="col-md-6 mb-3">
-            <div class="stat-card">
-                <div class="stat-title">Total Registered Students</div>
-                <div class="stat-value"><?= $totalStudent ?></div>
+    <div class="card-gov p-3 mb-4">
+        <form method="GET" class="row align-items-end g-2">
+            <input type="hidden" name="cat_filter" value="<?= htmlspecialchars($filter_cat) ?>">
+            <input type="hidden" name="level_filter" value="<?= htmlspecialchars($filter_level) ?>">
+            
+            <div class="col-md-9">
+                <label class="form-label small fw-bold text-muted mb-1">GLOBAL PROGRAM FILTER</label>
+                <select name="program" class="form-select form-select-sm">
+                    <option value="">All Programs</option>
+                    <option value="JTMK" <?= ($filter_program == 'JTMK') ? 'selected' : '' ?>>JTMK - ICT Department</option>
+                    <option value="JKA" <?= ($filter_program == 'JKA') ? 'selected' : '' ?>>JKA - Civil Engineering</option>
+                    <option value="JKM" <?= ($filter_program == 'JKM') ? 'selected' : '' ?>>JKM - Mechanical Engineering</option>
+                    <option value="JKE" <?= ($filter_program == 'JKE') ? 'selected' : '' ?>>JKE - Electrical Engineering</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-gov w-100">APPLY GLOBAL FILTER</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row mb-4 g-3">
+        <div class="col-12">
+            <div class="card-gov p-4">
+                <div class="filter-box">
+                    <form method="GET" class="row g-2">
+                        <input type="hidden" name="program" value="<?= htmlspecialchars($filter_program) ?>">
+                        <input type="hidden" name="level_filter" value="<?= htmlspecialchars($filter_level) ?>">
+                        
+                        <div class="col-8">
+                            <select name="cat_filter" class="form-select form-select-sm">
+                                <option value="">All Talent Categories</option>
+                                <?php mysqli_data_seek($category_list, 0); while($c = mysqli_fetch_assoc($category_list)): ?>
+                                    <option value="<?= $c['category_id'] ?>" <?= ($filter_cat == $c['category_id']) ? 'selected' : '' ?>><?= $c['category_name'] ?></option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+                        <div class="col-4 btn-group">
+                            <button type="submit" class="btn btn-gov btn-sm">Filter</button>
+                            <a href="dashboard.php?program=<?= urlencode($filter_program) ?>&level_filter=<?= urlencode($filter_level) ?>" class="btn btn-light btn-sm border">Reset</a>
+                        </div>
+                    </form>
+                </div>
+                <h6 class="fw-bold mb-3 text-uppercase" style="color: var(--gov-navy);">Student Distribution by Category</h6>
+                <div style="height: 300px;"><canvas id="categoryChart"></canvas></div>
             </div>
         </div>
-        <div class="col-md-6 mb-3">
-            <div class="stat-card">
-                <div class="stat-title">Top Talent Category</div>
-                <div class="stat-value"><?= $topCategory ? htmlspecialchars($topCategory['category_name']) : '-' ?></div>
-                <?php if($topCategory): ?>
-                    <small class="text-muted"><?= $topCategory['total'] ?> Achievements Recorded</small>
-                <?php endif; ?>
+
+        <div class="col-12">
+            <div class="card-gov p-4">
+                <div class="filter-box">
+                    <form method="GET" class="row g-2">
+                        <input type="hidden" name="program" value="<?= htmlspecialchars($filter_program) ?>">
+                        <input type="hidden" name="cat_filter" value="<?= htmlspecialchars($filter_cat) ?>">
+                        
+                        <div class="col-8">
+                            <select name="level_filter" class="form-select form-select-sm">
+                                <option value="">All Achievement Levels</option>
+                                <option value="University" <?= ($filter_level == 'University') ? 'selected' : '' ?>>University</option>
+                                <option value="State" <?= ($filter_level == 'State') ? 'selected' : '' ?>>State</option>
+                                <option value="National" <?= ($filter_level == 'National') ? 'selected' : '' ?>>National</option>
+                                <option value="International" <?= ($filter_level == 'International') ? 'selected' : '' ?>>International</option>
+                            </select>
+                        </div>
+                        <div class="col-4 btn-group">
+                            <button type="submit" class="btn btn-gov btn-sm">Filter</button>
+                            <a href="dashboard.php?program=<?= urlencode($filter_program) ?>&cat_filter=<?= urlencode($filter_cat) ?>" class="btn btn-light btn-sm border">Reset</a>
+                        </div>
+                    </form>
+                </div>
+                <h6 class="fw-bold mb-3 text-uppercase" style="color: var(--gov-navy);">Certification Level Analysis</h6>
+                <div style="height: 300px;"><canvas id="levelChart"></canvas></div>
             </div>
         </div>
     </div>
-
-    <div class="card-gov p-4 mb-4">
-        <h5 class="fw-bold mb-4" style="color: #002b5e;">Student Distribution by Category</h5>
-        <div style="height: 400px;">
-            <canvas id="categoryChart"></canvas>
-        </div>
-    </div>
-
-    <div class="alert shadow-sm border-0 d-flex align-items-center" style="background: #eef4ff; border-left: 5px solid #002b5e !important;">
-        <div class="me-3 fs-3 text-primary"><i class="fas fa-robot"></i></div>
-        <div>
-            <h6 class="fw-bold mb-1" style="color: #002b5e;">AI Data Insight</h6>
-            <div class="text-dark small"><?= $ai_text ?></div>
+    
+    <div class="row g-3">
+        <div class="col-md-12">
+            <div class="stat-card d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-bold">TOTAL STUDENTS WITH TALENTS (BASED ON FILTER)</div>
+                    <h2 class="fw-bold mb-0" style="color: var(--gov-navy);"><?= $totalStudent ?></h2>
+                </div>
+                <div class="text-end">
+                    <a href="dashboard.php" class="btn btn-outline-danger btn-sm fw-bold">RESET ALL DASHBOARD FILTERS</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    const ctx = document.getElementById('categoryChart').getContext('2d');
-    
-    // Tatasusunan warna berbeza untuk setiap kategori
+document.addEventListener('DOMContentLoaded', function() {
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#eee' }, ticks: { stepSize: 1 } },
+            x: { grid: { display: false } }
+        }
+    };
+
+    // Set Warna Berbeza untuk Setiap Bar
     const categoryColors = [
-        '#002b5e', // Navy Blue
-        '#eeb012', // Gold
-        '#1e40af', // Royal Blue
-        '#0f766e', // Teal
-        '#4338ca', // Indigo
-        '#b45309', // Amber
-        '#1d4ed8', // Blue
-        '#374151', // Slate
-        '#be185d', // Pink
-        '#15803d'  // Green
+        '#002b5e', '#eeb012', '#1e40af', '#0f766e', 
+        '#4338ca', '#b45309', '#374151', '#be185d', 
+        '#15803d', '#dc2626'
     ];
 
-    new Chart(ctx, {
+    const levelColors = [
+        '#eeb012', '#002b5e', '#15803d', '#dc2626'
+    ];
+
+    // Category Chart (Bar)
+    new Chart(document.getElementById('categoryChart').getContext('2d'), {
         type: 'bar',
         data: {
-            labels: <?= json_encode($labels) ?>,
+            labels: <?= json_encode($catLabels) ?>,
             datasets: [{
-                label: 'Number of Talents',
-                data: <?= json_encode($data) ?>,
-                backgroundColor: categoryColors, // Menggunakan array warna
-                borderColor: categoryColors,
-                borderWidth: 1,
+                label: 'Total Talents',
+                data: <?= json_encode($catData) ?>,
+                backgroundColor: categoryColors, // Menggunakan array warna di sini
                 borderRadius: 5
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: { 
-                    beginAtZero: true, 
-                    grid: { color: '#edf2f7' }, 
-                    ticks: { color: '#4a5568', stepSize: 1 } 
-                },
-                x: { 
-                    grid: { display: false }, 
-                    ticks: { color: '#4a5568', font: { weight: 'bold' } } 
-                }
-            }
-        }
+        options: commonOptions
     });
+
+    // Level Chart (Bar)
+    new Chart(document.getElementById('levelChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: <?= json_encode($levelLabels) ?>,
+            datasets: [{
+                label: 'Total Talents',
+                data: <?= json_encode($levelData) ?>,
+                backgroundColor: levelColors, // Menggunakan array warna di sini
+                borderRadius: 5
+            }]
+        },
+        options: commonOptions
+    });
+});
 </script>
 
 <?php include "includes/footer.php"; ?>
