@@ -31,7 +31,7 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventa | Student Talent Management System</title>
 <meta name="description" content="Inventa is a student talent management system that helps manage student profiles, achievements, talents, and certificates in one platform.">
-<meta name="robots" content="noindex, follow">
+<meta name="robots" content="index, follow">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
