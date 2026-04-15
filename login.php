@@ -29,7 +29,9 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login - INVENTA</title>
+<title>INVENTA - Student Talent Management System</title>
+<meta name="description" content="INVENTA is a student talent management system for managing student profiles, achievements, and certifications.">
+<meta name="robots" content="noindex, follow">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
