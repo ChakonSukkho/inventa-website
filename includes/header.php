@@ -13,7 +13,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <meta name="description" content="Inventa is a student talent management system that helps manage student profiles, achievements, talents, and certificates in one platform.">
     <meta name="keywords" content="Inventa, student talent management, student certificates, student achievements, student profile system">
     <meta name="author" content="Inventa">
-    <meta name="robots" content="noindex, follow">
+    <meta name="robots" content="index, follow">
 
     <meta property="og:title" content="Inventa | Student Talent Management System">
     <meta property="og:description" content="Manage student profiles, talents, achievements, and certificates in one platform.">
