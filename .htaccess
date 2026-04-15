@@ -1,0 +1,3 @@
+RewriteEngine On
+RewriteCond %{HTTP_HOST} !^inventa\.my$ [NC]
+RewriteRule ^(.*)$ https://inventa.my/$1 [R=301,L]
