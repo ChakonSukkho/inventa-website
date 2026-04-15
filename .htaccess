@@ -1,6 +1,8 @@
+Options -Indexes
+DirectoryIndex index.php index.html
+
 RewriteEngine On
 
-# Force HTTPS + remove www
-RewriteCond %{HTTPS} off [OR]
-RewriteCond %{HTTP_HOST} ^www\.inventa\.my$ [NC]
+# Force HTTPS
+RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://inventa.my/$1 [R=301,L]
