@@ -2,10 +2,10 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$host = "inventa-server.mysql.database.azure.com";
-$user = "mlvpiarvob";
-$pass = "Inventa123@";
-$db   = "inventa-database";
+$host = "localhost";
+$user = "norfaiz_inventa_user";
+$pass = "1nvent@";
+$db   = "norfaiz_inventa_db";
 $port = 3306;
 
 $conn = mysqli_init();
