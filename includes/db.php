@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$host = "localhost";
+$host = "103.6.196.30";
 $user = "norfaiz_inventa_user";
 $pass = "1nvent@";
 $db   = "norfaiz_inventa_db";
