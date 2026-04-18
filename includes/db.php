@@ -2,28 +2,24 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+/* =========================
+   DATABASE CONFIG (LOCAL)
+========================= */
 $host = "localhost";
-$user = "norfaiz_inventa_user";
-$pass = "1nvent@";
-$db   = "norfaiz_inventa_db";
+$user = "root";
+$pass = "";
+$db   = "inventa_db";
 $port = 3306;
 
-$conn = mysqli_init();
-mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
+/* =========================
+   CONNECT DATABASE
+========================= */
+$conn = mysqli_connect($host, $user, $pass, $db, $port);
 
-mysqli_real_connect(
-    $conn,
-    $host,
-    $user,
-    $pass,
-    $db,
-    $port,
-    NULL,
-    MYSQLI_CLIENT_SSL
-);
-
-if (mysqli_connect_errno()) {
+/* =========================
+   CHECK CONNECTION
+========================= */
+if (!$conn) {
     die("DB ERROR: " . mysqli_connect_error());
 }
-
 ?>
