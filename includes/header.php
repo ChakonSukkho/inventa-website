@@ -31,8 +31,21 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['role']) &&
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INVENTA - Student Talent Management</title>
-    
+    <title>Inventa | Student Talent Management System</title>
+
+    <meta name="description" content="Inventa is a student talent management system that helps manage student profiles, achievements, talents, and certificates in one platform.">
+    <meta name="keywords" content="Inventa, student talent management, student certificates, student achievements, student profile system">
+    <meta name="author" content="Inventa">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:title" content="Inventa | Student Talent Management System">
+    <meta property="og:description" content="Manage student profiles, talents, achievements, and certificates in one platform.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://inventa.my">
+    <meta property="og:image" content="https://inventa.my/logo.png">
+
+    <link rel="icon" type="image/png" href="logo.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
