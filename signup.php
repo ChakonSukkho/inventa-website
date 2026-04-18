@@ -351,8 +351,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
                 <div class="row">
                     <div class="col-md-12">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-control" name="username" placeholder="Choose a unique username" required value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>">
+                        <label class="form-label">Id Number</label>
+                        <input type="text" class="form-control" name="username" placeholder="Enter Id Number" required value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>">
                     </div>
                 </div>
 

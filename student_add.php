@@ -8,6 +8,8 @@ require_login();
 ============================================================ */
 require_role(['admin', 'staff']);
 
+$dept_result = mysqli_query($conn, "SELECT * FROM departments ORDER BY department_name ASC");
+
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     // Account Details
@@ -185,10 +187,15 @@ include "includes/header.php";
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Program (Department)</label>
                         <select class="form-select" name="program" required>
-                            <option value="JTMK" <?= (isset($_POST['program']) && $_POST['program'] == 'JTMK') ? 'selected' : '' ?>>JTMK</option>
-                            <option value="JKA" <?= (isset($_POST['program']) && $_POST['program'] == 'JKA') ? 'selected' : '' ?>>JKA</option>
-                            <option value="JKM" <?= (isset($_POST['program']) && $_POST['program'] == 'JKM') ? 'selected' : '' ?>>JKM</option>
-                            <option value="JKE" <?= (isset($_POST['program']) && $_POST['program'] == 'JKE') ? 'selected' : '' ?>>JKE</option>
+                            <option value="">-- Select Program --</option>
+
+                            <?php while($dept = mysqli_fetch_assoc($dept_result)): ?>
+                                <option value="<?= $dept['department_name'] ?>"
+                                    <?= (isset($_POST['program']) && $_POST['program'] == $dept['department_name']) ? 'selected' : '' ?>>
+                                    <?= $dept['department_name'] ?>
+                                </option>
+                            <?php endwhile; ?>
+
                         </select>
                     </div>
                 </div>
@@ -207,8 +214,8 @@ include "includes/header.php";
                 <span class="section-label">Account Security</span>
                 
                 <div class="mb-3">
-                    <label class="form-label">Username</label>
-                    <input type="text" name="username" class="form-control" placeholder="Set a unique username for login" required value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>">
+                    <label class="form-label">Id Number</label>
+                    <input type="text" name="username" class="form-control" placeholder="Enter Id Number" required value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>">
                 </div>
 
                 <div class="row">

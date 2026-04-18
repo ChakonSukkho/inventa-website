@@ -3,6 +3,8 @@ require_once "includes/init.php";
 require_login();
 require_role(['admin']);
 
+$dept_result = mysqli_query($conn, "SELECT * FROM departments ORDER BY department_name ASC");
+
 if (!isset($_GET['id'])) {
     header("Location: staff_list.php");
     exit;
@@ -31,12 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     } else {
         // Update basic info
         if (!empty($new_password)) {
-            // If admin wants to reset the staff password
             $hash = password_hash($new_password, PASSWORD_DEFAULT);
             $stmt_upd = mysqli_prepare($conn, "UPDATE users SET username = ?, department = ?, password = ? WHERE user_id = ?");
             mysqli_stmt_bind_param($stmt_upd, "sssi", $username, $department, $hash, $user_id);
         } else {
-            // Update without changing password
             $stmt_upd = mysqli_prepare($conn, "UPDATE users SET username = ?, department = ? WHERE user_id = ?");
             mysqli_stmt_bind_param($stmt_upd, "ssi", $username, $department, $user_id);
         }
@@ -79,10 +79,14 @@ include "includes/header.php";
                 <div class="mb-3">
                     <label class="form-label fw-bold small text-secondary">Department</label>
                     <select class="form-select" name="department" required>
-                        <option value="JKA" <?= ($staff['department'] == 'JKA') ? 'selected' : '' ?>>JKA</option>
-                        <option value="JKM" <?= ($staff['department'] == 'JKM') ? 'selected' : '' ?>>JKM</option>
-                        <option value="JKE" <?= ($staff['department'] == 'JKE') ? 'selected' : '' ?>>JKE</option>
-                        <option value="JTMK" <?= ($staff['department'] == 'JTMK') ? 'selected' : '' ?>>JTMK</option>
+
+                        <?php while($dept = mysqli_fetch_assoc($dept_result)): ?>
+                            <option value="<?= $dept['department_name'] ?>"
+                                <?= ($staff['department'] == $dept['department_name']) ? 'selected' : '' ?>>
+                                <?= $dept['department_name'] ?>
+                            </option>
+                        <?php endwhile; ?>
+
                     </select>
                 </div>
 

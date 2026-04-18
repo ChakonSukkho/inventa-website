@@ -2,6 +2,29 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+/* FORCE PASSWORD CHANGE */
+if (isset($_SESSION['user_id']) && isset($_SESSION['role']) && 
+    ($_SESSION['role'] === 'student' || $_SESSION['role'] === 'staff')) {
+
+    require_once "includes/init.php"; // ensure DB connection
+
+    $uid = $_SESSION['user_id'];
+
+    $stmt = mysqli_prepare($conn, "SELECT must_change_password FROM users WHERE user_id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $uid);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+    if ($result && $result['must_change_password'] == 1) {
+
+        // allow only change_password page
+        if (basename($_SERVER['PHP_SELF']) !== 'change_password.php') {
+            header("Location: change_password.php");
+            exit;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

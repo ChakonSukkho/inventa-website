@@ -96,10 +96,19 @@ include "includes/header.php";
     
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="page-title">Student Directory</h3>
+
         <?php if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'staff'): ?>
-            <a href="student_add.php" class="btn btn-gov shadow-sm">
-                <i class="fas fa-plus me-2"></i>Register New Student
-            </a>
+            <div class="d-flex gap-2">
+
+                <a href="admin_import_students.php" class="btn btn-gov shadow-sm">
+                <i class="fas fa-file-import me-2"></i>Import Students
+                </a>
+
+                <a href="student_add.php" class="btn btn-gov shadow-sm">
+                    <i class="fas fa-plus me-2"></i>Register New Student
+                </a>
+
+            </div>
         <?php endif; ?>
     </div>
 

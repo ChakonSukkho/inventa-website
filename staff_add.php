@@ -3,6 +3,8 @@ require_once "includes/init.php";
 require_login();
 require_role(['admin']);
 
+$dept_result = mysqli_query($conn, "SELECT * FROM departments ORDER BY department_name ASC");
+
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     $username   = trim($_POST['username']);
@@ -57,18 +59,21 @@ include "includes/header.php";
 
             <form method="POST">
                 <div class="mb-3">
-                    <label class="form-label fw-bold small text-secondary">Username</label>
-                    <input type="text" name="username" class="form-control" placeholder="Enter staff username" required>
+                    <label class="form-label fw-bold small text-secondary">Id Number</label>
+                    <input type="text" name="username" class="form-control" placeholder="Enter Id Number" required>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-bold small text-secondary">Department</label>
                     <select class="form-select" name="department" required>
                         <option value="">-- Select Department --</option>
-                        <option value="JKA">JKA</option>
-                        <option value="JKM">JKM</option>
-                        <option value="JKE">JKE</option>
-                        <option value="JTMK">JTMK</option>
+
+                        <?php while($dept = mysqli_fetch_assoc($dept_result)): ?>
+                            <option value="<?= $dept['department_name'] ?>">
+                                <?= $dept['department_name'] ?>
+                            </option>
+                        <?php endwhile; ?>
+
                     </select>
                 </div>
 
