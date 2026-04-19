@@ -13,6 +13,4 @@ if (!$conn) {
     die("DB ERROR: " . mysqli_connect_error());
 }
 
-echo "DB connected successfully";
-
 ?>
