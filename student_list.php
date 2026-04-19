@@ -157,14 +157,14 @@ include "includes/header.php";
                                         </div>
                                     <?php endif; ?>
                                     <div>
-                                        <div class="fw-bold" style="color: var(--gov-navy);"><?= htmlspecialchars($row['student_name'] ?? '') ?></div>
-                                        <div class="small text-muted"><?= htmlspecialchars($row['email'] ?? '') ?></div>
+                                        <div class="fw-bold" style="color: var(--gov-navy);"><?= htmlspecialchars($row['student_name'] ?? 'N/A') ?></div>
+                                        <div class="small text-muted"><?= htmlspecialchars($row['email'] ?? 'N/A') ?></div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="fw-bold"><?= htmlspecialchars($row['matric_no'] ?? '') ?></td>
-                            <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($row['program'] ?? '') ?></span></td>
-                            <td>Year <?= htmlspecialchars($row['year_level'] ?? '') ?></td>
+                            <td class="fw-bold"><?= htmlspecialchars($row['matric_no'] ?? 'N/A') ?></td>
+                            <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($row['program'] ?? 'N/A') ?></span></td>
+                            <td>Year <?= htmlspecialchars($row['year_level'] ?? 'N/A') ?></td>
                             <td class="text-center">
                                 <div class="btn-group shadow-sm">
                                     <a href="student_view.php?id=<?= $row['student_id'] ?>" 
