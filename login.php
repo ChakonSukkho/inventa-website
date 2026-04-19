@@ -10,7 +10,7 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
         $error = "Please verify that you are not a robot.";
     } else {
 
-        $secret = "6LcsZ7csAAAAAGLQNehX35uEstRKWEyasjVjPpNg"; //replace with your secret key
+        $secret = "6LfT6b4sAAAAALBUNKM4TX4P8MQ8wldfv0FOV2MV"; //replace with your secret key
 
         $response = file_get_contents(
             "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$recaptcha"
@@ -259,7 +259,7 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 
                 <!-- CAPTCHA UI -->
                 <div class="mb-4">
-                    <div class="g-recaptcha" data-sitekey="6LcsZ7csAAAAAOg0HYnLqTQh_yaHG7tOD4TDHhOl"></div>
+                    <div class="g-recaptcha" data-sitekey="6LfT6b4sAAAAAHm5Y9PnF-HkxrmInEAwKZgihka4"></div>
                 </div>
 
                 <button type="submit" class="btn btn-login w-100 mb-4">LOGIN</button>
