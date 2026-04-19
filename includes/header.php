@@ -2,27 +2,37 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+/* FORCE PASSWORD CHANGE */
+if (isset($_SESSION['user_id']) && isset($_SESSION['role']) && 
+    ($_SESSION['role'] === 'student' || $_SESSION['role'] === 'staff')) {
+
+    require_once "includes/init.php"; // ensure DB connection
+
+    $uid = $_SESSION['user_id'];
+
+    $stmt = mysqli_prepare($conn, "SELECT must_change_password FROM users WHERE user_id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $uid);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+    if ($result && $result['must_change_password'] == 1) {
+
+        // allow only change_password page
+        if (basename($_SERVER['PHP_SELF']) !== 'change_password.php') {
+            header("Location: change_password.php");
+            exit;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventa | Student Talent Management System</title>
-
-    <meta name="description" content="Inventa is a student talent management system that helps manage student profiles, achievements, talents, and certificates in one platform.">
-    <meta name="keywords" content="Inventa, student talent management, student certificates, student achievements, student profile system">
-    <meta name="author" content="Inventa">
-    <meta name="robots" content="index, follow">
-
-    <meta property="og:title" content="Inventa | Student Talent Management System">
-    <meta property="og:description" content="Manage student profiles, talents, achievements, and certificates in one platform.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://inventa.my">
-    <meta property="og:image" content="https://inventa.my/logo.png">
-
-    <link rel="icon" type="image/png" href="logo.png">
-
+    <title>INVENTA - Student Talent Management</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

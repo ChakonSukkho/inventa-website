@@ -2,24 +2,47 @@
 require_once "includes/init.php";
 
 if($_SERVER['REQUEST_METHOD']=="POST"){
-    $username=$_POST['username'];
-    $password=$_POST['password'];
 
-    $stmt=mysqli_prepare($conn,"SELECT * FROM users WHERE username=?");
-    mysqli_stmt_bind_param($stmt,"s",$username);
-    mysqli_stmt_execute($stmt);
-    $result=mysqli_stmt_get_result($stmt);
-    $user=mysqli_fetch_assoc($result);
+    // CAPTCHA CHECK (ADDED)
+    $recaptcha = $_POST['g-recaptcha-response'] ?? '';
 
-    if($user && password_verify($password,$user['password'])){
-        $_SESSION['user_id']=$user['user_id'];
-        $_SESSION['username']=$user['username'];
-        $_SESSION['role']=$user['role'];
-        
-        header("Location: dashboard.php");
-        exit;
+    if (empty($recaptcha)) {
+        $error = "Please verify that you are not a robot.";
     } else {
-        $error="Invalid Username or Password."; 
+
+        $secret = "6LcsZ7csAAAAAGLQNehX35uEstRKWEyasjVjPpNg"; //replace with your secret key
+
+        $response = file_get_contents(
+            "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$recaptcha"
+        );
+
+        $responseKeys = json_decode($response, true);
+
+        if (!$responseKeys["success"]) {
+            $error = "CAPTCHA verification failed. Try again.";
+        } else {
+
+            // ORIGINAL LOGIN LOGIC (UNCHANGED)
+            $username=$_POST['username'];
+            $password=$_POST['password'];
+
+            $stmt=mysqli_prepare($conn,"SELECT * FROM users WHERE username=?");
+            mysqli_stmt_bind_param($stmt,"s",$username);
+            mysqli_stmt_execute($stmt);
+            $result=mysqli_stmt_get_result($stmt);
+            $user=mysqli_fetch_assoc($result);
+
+            if($user && password_verify($password,$user['password'])){
+                $_SESSION['user_id']=$user['user_id'];
+                $_SESSION['username']=$user['username'];
+                $_SESSION['role']=$user['role'];
+                
+                header("Location: dashboard.php");
+                exit;
+            } else {
+                $error="Invalid Username or Password."; 
+            }
+        }
     }
 }
 ?>
@@ -29,12 +52,11 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inventa | Student Talent Management System</title>
-<meta name="description" content="Inventa is a student talent management system that helps manage student profiles, achievements, talents, and certificates in one platform.">
-<meta name="robots" content="index, follow">
+<title>Login - INVENTA</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="icon" type="image/png" href="logo.png">
 
+<!-- CAPTCHA SCRIPT -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 <style>
     /* Tetapan Warna Korporat Rasmi */
@@ -54,7 +76,6 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
         font-family: 'Arial', sans-serif;
     }
 
-    /* --- GAYA NAVBAR RASMI --- */
     .navbar-custom {
         background-color: #ffffff;
         border-bottom: 4px solid var(--gov-blue);
@@ -98,7 +119,6 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
         font-weight: 600;
     }
 
-    /* --- KAWASAN KANDUNGAN & KOTAK LOGIN --- */
     .content-wrapper {
         flex-grow: 1;
         display: flex;
@@ -180,7 +200,6 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
         text-decoration: underline;
     }
 
-    /* --- FOOTER RASMI --- */
     .footer-custom {
         background-color: #ffffff;
         border-top: 1px solid #e5e5e5;
@@ -224,11 +243,11 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
             <form method="POST">
                 
                 <div class="mb-3">
-                    <label class="form-label">Username</label>
-                    <input type="text" name="username" class="form-control" placeholder="Enter Username" required>
+                    <label class="form-label">Id Number</label>
+                    <input type="text" name="username" class="form-control" placeholder="Enter Id Number" required>
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="form-label">Password</label>
                     <div class="input-group">
                         <input type="password" name="password" id="password" class="form-control" placeholder="Enter Password" required>
@@ -238,15 +257,12 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-login w-100 mb-4">LOGIN</button>
-                
-                <div class="text-center border-top pt-3">
-                    <span style="font-size: 0.85rem; color: #666;">New user?</span><br>
-                    <a href="signup.php" class="link-register">
-                        Register Student Account
-                    </a>
+                <!-- CAPTCHA UI -->
+                <div class="mb-4">
+                    <div class="g-recaptcha" data-sitekey="6LcsZ7csAAAAAOg0HYnLqTQh_yaHG7tOD4TDHhOl"></div>
                 </div>
 
+                <button type="submit" class="btn btn-login w-100 mb-4">LOGIN</button>
             </form>
         </div>
     </div>

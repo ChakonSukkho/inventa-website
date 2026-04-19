@@ -3,6 +3,8 @@ require_once "includes/init.php";
 require_login();
 require_role(['admin','staff','student']);
 
+$dept_result = mysqli_query($conn, "SELECT * FROM departments ORDER BY department_name ASC");
+
 if (is_admin() || is_staff()) {
     $id = (int)($_GET['id'] ?? 0);
     if ($id <= 0) die("Pelajar tidak sah");
@@ -37,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         if (in_array($ext, $allowed) && $file['size'] < 2000000) { // Had 2MB
             $new_name = time() . "_" . uniqid() . "." . $ext;
             if (move_uploaded_file($file['tmp_name'], "uploads/" . $new_name)) {
-                // Padam gambar lama jika ada
                 if (!empty($student['profile_pic']) && file_exists("uploads/" . $student['profile_pic'])) {
                     unlink("uploads/" . $student['profile_pic']);
                 }
@@ -64,7 +65,6 @@ include "includes/header.php";
 ?>
 
 <style>
-    /* Force Light Theme */
     body { background-color: #f8f9fa !important; color: #333 !important; }
     .main-card { background: #fff; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .card-header-gov { background-color: #002b5e; color: #fff; border-bottom: 4px solid #eeb012; padding: 15px; border-radius: 8px 8px 0 0; }
@@ -81,7 +81,8 @@ include "includes/header.php";
         <div class="p-4">
             <?php if(isset($error)) echo "<div class='alert alert-danger'>$error</div>"; ?>
             
-            <form method="POST" enctype="multipart/form-data"> <div class="text-center mb-4">
+            <form method="POST" enctype="multipart/form-data"> 
+                <div class="text-center mb-4">
                     <label class="form-label d-block fw-bold">Profile Picture</label>
                     <?php if($student['profile_pic']): ?>
                         <img src="uploads/<?= $student['profile_pic'] ?>" class="rounded-circle mb-2" style="width:120px; height:120px; object-fit:cover; border:3px solid #002b5e;">
@@ -102,7 +103,16 @@ include "includes/header.php";
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Program</label>
-                        <input type="text" name="program" class="form-control" value="<?= e($student['program']) ?>" required>
+
+                        <select name="program" class="form-control" required>
+                            <?php while($dept = mysqli_fetch_assoc($dept_result)): ?>
+                                <option value="<?= $dept['department_name'] ?>"
+                                    <?= ($student['program'] == $dept['department_name']) ? 'selected' : '' ?>>
+                                    <?= $dept['department_name'] ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Year/Session</label>

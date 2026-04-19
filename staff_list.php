@@ -28,9 +28,19 @@ $result = mysqli_query($conn,
 <div class="container mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="page-title">Staff Management</h3>
-        <a href="staff_add.php" class="btn btn-gov shadow-sm">
-            <i class="fas fa-user-plus me-2"></i>+ Add New Staff
-        </a>
+
+        <!-- BUTTON SECTION -->
+        <div class="d-flex gap-2">
+            
+            <a href="admin_import_students.php" class="btn btn-gov shadow-sm">
+                <i class="fas fa-file-import me-2"></i>Import Staff
+            </a>
+
+            <a href="staff_add.php" class="btn btn-gov shadow-sm">
+                <i class="fas fa-user-plus me-2"></i>+ Add New Staff
+            </a>
+
+        </div>
     </div>
 
     <div class="card-gov p-4">
